@@ -35,7 +35,7 @@ System PiChat umożliwia interakcję użytkownika z asystentem AI poprzez interf
 
 ### Kontenery (C2)
 
-![Diagram kontenerów systemu PiChat](PiChat_diagram_2.png)
+![Diagram kontenerów systemu PiChat](PiChat_diagram_c2.png)
 
 Diagram pokazuje główne komponenty systemu PiChat:
 - Interfejs głosowy oparty o Raspberry Pi obsługujący interakcje głosowe

@@ -1,0 +1,80 @@
+version: '3.8'
+
+services:
+  # Go backend service
+  pichat-backend:
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile
+    container_name: pichat-backend
+    restart: unless-stopped
+    ports:
+      - "${SERVER_PORT:-8080}:8080"
+    environment:
+      # Server configuration
+      SERVER_PORT: ${SERVER_PORT:-8080}
+      API_TOKEN: ${API_TOKEN:-your_secure_token_here}
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+      
+      # Azure OpenAI configuration
+      AZURE_OPENAI_ENDPOINT: ${AZURE_OPENAI_ENDPOINT}
+      AZURE_OPENAI_KEY: ${AZURE_OPENAI_KEY}
+      AZURE_OPENAI_DEPLOYMENT_GPT4: ${AZURE_OPENAI_DEPLOYMENT_GPT4}
+      AZURE_OPENAI_DEPLOYMENT_GPT35: ${AZURE_OPENAI_DEPLOYMENT_GPT35}
+      
+      # Azure Speech configuration
+      AZURE_SPEECH_KEY: ${AZURE_SPEECH_KEY}
+      AZURE_SPEECH_REGION: ${AZURE_SPEECH_REGION}
+      
+      # Database configuration (pointing to the database service)
+      DB_HOST: db
+      DB_NAME: ${DB_NAME:-pichat}
+      DB_USER: ${DB_USER:-pichat_admin}
+      DB_PASSWORD: ${DB_PASSWORD:-secure_password}
+      DB_PORT: ${DB_PORT:-5432}
+    depends_on:
+      - db
+    networks:
+      - pichat-network
+    volumes:
+      - ./Backend:/app
+      - backend-data:/root/data
+
+  # Database service (PostgreSQL for local development)
+  db:
+    image: postgres:15-alpine
+    container_name: pichat-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-pichat}
+      POSTGRES_USER: ${DB_USER:-pichat_admin}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-secure_password}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - pichat-network
+
+  # pgAdmin for database management (optional)
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pichat-pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@pichat.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
+    ports:
+      - "${PGADMIN_PORT:-5050}:80"
+    depends_on:
+      - db
+    networks:
+      - pichat-network
+
+networks:
+  pichat-network:
+    driver: bridge
+
+volumes:
+  backend-data:
+  postgres-data: 
