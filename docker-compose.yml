@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  # Go backend service
+  # FastAPI backend service
   pichat-backend:
     build:
       context: ./Backend
@@ -38,7 +38,7 @@ services:
       - pichat-network
     volumes:
       - ./Backend:/app
-      - backend-data:/root/data
+      - backend-data:/app/data
 
   # Database service (PostgreSQL for local development)
   db:

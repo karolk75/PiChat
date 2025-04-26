@@ -1,143 +1,161 @@
-# Docker Setup for PiChat Backend
+# Docker Setup for PiChat
 
-This document provides instructions for setting up the PiChat Backend using Docker Compose.
+This document provides instructions for setting up and running PiChat using Docker.
 
 ## Prerequisites
 
-- [Docker](https://docs.docker.com/get-docker/) installed on your system
-- [Docker Compose](https://docs.docker.com/compose/install/) installed on your system
-- Access to Azure services (OpenAI, Speech) if using in production mode
+Before you begin, make sure you have the following tools installed on your system:
+
+- [Docker](https://docs.docker.com/get-docker/) (20.10+)
+- [Docker Compose](https://docs.docker.com/compose/install/) (2.0+)
+
+## Components
+
+The PiChat application consists of the following containers:
+
+1. **pichat-backend** - FastAPI backend that provides WebSocket API and integrations with Azure services
+2. **db** - PostgreSQL database for storing conversations and user data
+3. **pgadmin** (optional) - Administration tool for PostgreSQL database
+
+## Configuration
+
+Create a `.env` file in the root directory with the following variables:
+
+```
+# Server configuration
+SERVER_PORT=8080
+API_TOKEN=your_secure_token_here
+ENVIRONMENT=development
+
+# Azure OpenAI configuration
+AZURE_OPENAI_ENDPOINT=your_azure_openai_endpoint
+AZURE_OPENAI_KEY=your_azure_openai_key
+AZURE_OPENAI_DEPLOYMENT_GPT4=your_gpt4_deployment_name
+AZURE_OPENAI_DEPLOYMENT_GPT35=your_gpt35_deployment_name
+
+# Azure Speech configuration
+AZURE_SPEECH_KEY=your_azure_speech_key
+AZURE_SPEECH_REGION=your_azure_speech_region
+
+# Database configuration
+DB_NAME=pichat
+DB_USER=pichat_admin
+DB_PASSWORD=secure_password
+DB_PORT=5432
+
+# pgAdmin configuration (optional)
+PGADMIN_EMAIL=admin@pichat.com
+PGADMIN_PASSWORD=admin
+PGADMIN_PORT=5050
+```
 
 ## Quick Start
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/karolk75/PiChat.git
-   cd PiChat
-   ```
-
-2. Set up your environment variables:
-   ```bash
-   cp .env.example .env
-   ```
-   
-   Edit the `.env` file with your specific configuration. At minimum, you should set:
-   - `API_TOKEN` - A secure token for API access
-   - Azure credentials if you're using Azure services
-
-3. Start the Docker containers:
-   ```bash
-   docker-compose up -d
-   ```
-
-4. Access the services:
-   - Backend API: `http://localhost:8080`
-   - WebSocket: `ws://localhost:8080/ws`
-   - pgAdmin (database management): `http://localhost:5050` (login with the credentials set in `.env`)
-
-## Services
-
-The Docker Compose setup includes the following services:
-
-### pichat-backend
-
-This is the main Go backend service that provides the WebSocket functionality and API endpoints.
-
-- **Port**: 8080 (configurable via .env)
-- **Volumes**: 
-  - `./Backend:/app` - Maps the Backend directory for development
-  - `backend-data:/root/data` - Persistent volume for data storage
-
-### db (PostgreSQL)
-
-PostgreSQL database for storing conversations, messages, and user settings.
-
-- **Port**: 5432 (configurable via .env)
-- **Default Credentials**:
-  - Database: pichat
-  - User: pichat_admin
-  - Password: secure_password (change this in production)
-
-### pgAdmin (Optional)
-
-Web interface for managing the PostgreSQL database.
-
-- **Port**: 5050 (configurable via .env)
-- **Default Credentials**:
-  - Email: admin@pichat.com
-  - Password: admin (change this in production)
-
-## Database Migration
-
-The application should handle database migrations automatically on startup. If you need to manually run migrations or seed data, you can use the following command:
+To start all containers:
 
 ```bash
-docker-compose exec pichat-backend ./api migrate
+docker-compose up -d
 ```
+
+To stop all containers:
+
+```bash
+docker-compose down
+```
+
+## Service Access
+
+After starting the containers, you can access the following services:
+
+- Backend API: http://localhost:8080
+- Backend API Documentation: http://localhost:8080/docs
+- PgAdmin (if enabled): http://localhost:5050
+
+## Database Management with pgAdmin
+
+1. Access pgAdmin at http://localhost:5050
+2. Login with the credentials specified in the `.env` file
+3. Add a new server with the following details:
+   - Name: PiChat
+   - Host: db
+   - Port: 5432
+   - Username: [DB_USER from .env]
+   - Password: [DB_PASSWORD from .env]
 
 ## Development Workflow
 
-For development:
+During development, you can use the following commands:
 
-1. Make changes to the Go code in the Backend directory
-2. Restart the backend service to apply changes:
-   ```bash
-   docker-compose restart pichat-backend
-   ```
+- View logs from all containers:
+  ```bash
+  docker-compose logs -f
+  ```
 
-For hot-reloading during development, you may want to:
-1. Install [Air](https://github.com/cosmtrek/air) for Go hot-reloading
-2. Modify the Dockerfile to use Air in development mode
+- View logs from a specific container:
+  ```bash
+  docker-compose logs -f pichat-backend
+  ```
 
-## Production Deployment
+- Restart a specific container:
+  ```bash
+  docker-compose restart pichat-backend
+  ```
 
-For production deployment:
+- Rebuild and restart containers after code changes:
+  ```bash
+  docker-compose up -d --build
+  ```
 
-1. Update the `.env` file with production settings:
-   - Set `ENVIRONMENT=production`
-   - Use strong passwords for database and API tokens
-   - Configure Azure services with production credentials
+## Data Persistence
 
-2. Build and start the services:
-   ```bash
-   docker-compose build
-   docker-compose up -d
-   ```
+The following data is persisted using Docker volumes:
+
+- **postgres-data**: PostgreSQL database files
+- **backend-data**: Backend application data (like temporary files)
 
 ## Troubleshooting
 
-### Cannot connect to the WebSocket
+### Connection Issues
 
-- Ensure ports are correctly mapped in docker-compose.yml
-- Check that the backend service is running: `docker-compose ps`
-- Verify logs for any errors: `docker-compose logs pichat-backend`
+If you can't connect to the services, check that:
 
-### Database connection issues
+1. Docker containers are running:
+   ```bash
+   docker-compose ps
+   ```
 
-- Check if the database container is running: `docker-compose ps db`
-- Verify database credentials in the .env file
-- Inspect database logs: `docker-compose logs db`
+2. Container logs for errors:
+   ```bash
+   docker-compose logs pichat-backend
+   ```
 
-## Maintenance
+### Database Issues
 
-### Backup Database
+If the application can't connect to the database:
 
-```bash
-docker-compose exec db pg_dump -U pichat_admin -d pichat > backup.sql
-```
+1. Check the database container is running:
+   ```bash
+   docker-compose ps db
+   ```
 
-### Restore Database
+2. Verify database environment variables in `.env` match those in `docker-compose.yml`
 
-```bash
-cat backup.sql | docker-compose exec -T db psql -U pichat_admin -d pichat
-```
+3. Check database logs:
+   ```bash
+   docker-compose logs db
+   ```
 
-### View Logs
+## Advanced Configuration
 
-```bash
-# All services
-docker-compose logs
+### Custom Networks
 
-# Specific service
-docker-compose logs pichat-backend
-``` 
+By default, all services use the `pichat-network` bridge network. You can modify this in the `docker-compose.yml` file if needed.
+
+### Production Deployment
+
+For production, consider:
+
+1. Changing default passwords and using secrets management
+2. Using a reverse proxy like Nginx for SSL termination
+3. Implementing proper backups for the database
+4. Setting `ENVIRONMENT=production` to disable development features 

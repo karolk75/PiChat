@@ -172,10 +172,11 @@ Interfejs głosowy PiChat działa na Raspberry Pi, oferując naturalne interakcj
 - Odpowiednie uprawnienia do zasobów systemowych
 
 ### Oprogramowanie serwerowe
-- Python 3.9+
-- Node.js 16+ LTS
-- NGINX 1.18+
-- PM2 5+
+- Python 3.11+
+- FastAPI 0.110+
+- Uvicorn 0.27+
+- SQLAlchemy 2.0+
+- NGINX 1.18+ (dla środowiska produkcyjnego)
 - Docker (opcjonalnie) 20+
 
 ### Usługi chmurowe Azure
