@@ -2,6 +2,7 @@ from .websocket import ConnectionManager
 from .routers.conversations import handle_get_conversations, handle_create_conversation
 from .routers.messages import handle_send_message, handle_get_messages
 from .routers.settings_router import handle_get_settings, handle_update_settings
+from .routers.chats import handle_get_chats, handle_create_chat, handle_get_chat_history, handle_delete_chat, handle_chat_message
 from .services.azure_speech import text_to_speech, speech_to_text
 import base64
 import logging
@@ -14,17 +15,24 @@ logger = logging.getLogger(__name__)
 def register_handlers(manager: ConnectionManager):
     """Register all WebSocket message handlers with the connection manager"""
     
-    # Register conversation handlers
+    # Register conversation handlers (legacy)
     manager.register_handler("get_conversations", handle_get_conversations)
     manager.register_handler("create_conversation", handle_create_conversation)
     
-    # Register message handlers
+    # Register message handlers (legacy)
     manager.register_handler("send_message", handle_send_message)
     manager.register_handler("get_messages", handle_get_messages)
     
-    # Register settings handlers
+    # Register settings handlers (legacy)
     manager.register_handler("get_settings", handle_get_settings)
     manager.register_handler("update_settings", handle_update_settings)
+    
+    # Register new chat handlers
+    manager.register_handler("GET_CHATS", handle_get_chats)
+    manager.register_handler("CREATE_CHAT", handle_create_chat)
+    manager.register_handler("GET_CHAT_HISTORY", handle_get_chat_history)
+    manager.register_handler("DELETE_CHAT", handle_delete_chat)
+    manager.register_handler("SEND_MESSAGE", handle_chat_message)
     
     # Register speech handlers
     manager.register_handler("text_to_speech", handle_text_to_speech)

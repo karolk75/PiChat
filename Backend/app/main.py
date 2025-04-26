@@ -5,9 +5,10 @@ from typing import Dict, List, Any
 import logging
 from .config import settings
 from .models import SessionLocal, engine, Base
-from .schemas import WebSocketMessage
+from .schemas import WebSocketCommand
 from .websocket import ConnectionManager
 from .routers import conversations, messages, users, settings_router
+from .routers.chats import router as chats_router 
 from .auth import get_api_key
 from .websocket_handlers import register_handlers
 
@@ -15,7 +16,7 @@ from .websocket_handlers import register_handlers
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Create database tables
+# Create database tables (legacy SQLAlchemy tables)
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="PiChat API", description="WebSocket and REST API for PiChat")
@@ -40,6 +41,7 @@ app.include_router(conversations.router, prefix="/api", tags=["conversations"])
 app.include_router(messages.router, prefix="/api", tags=["messages"])
 app.include_router(users.router, prefix="/api", tags=["users"])
 app.include_router(settings_router.router, prefix="/api", tags=["settings"])
+app.include_router(chats_router, prefix="/api", tags=["chats"])
 
 @app.get("/")
 async def root():
@@ -47,13 +49,12 @@ async def root():
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket, token: str = None):
-    # Validate API token
-    if not token or token != settings.API_TOKEN:
+    # Accept connection without token validation in development
+    if settings.ENVIRONMENT == "development" or (token and token == settings.API_TOKEN):
+        await manager.connect(websocket)
+    else:
         await websocket.close(code=1008)  # Policy violation
         return
-    
-    # Accept connection
-    await manager.connect(websocket)
     
     try:
         while True:
@@ -61,13 +62,21 @@ async def websocket_endpoint(websocket: WebSocket, token: str = None):
             data = await websocket.receive_text()
             message_data = json.loads(data)
             
-            # Process message based on action
-            message = WebSocketMessage(**message_data)
-            response = await manager.handle_message(message, websocket)
+            # Process message based on action/type
+            action = message_data.get("type", message_data.get("action", ""))
             
-            # Send response if applicable
-            if response:
-                await websocket.send_text(json.dumps(response))
+            # Handle both legacy and new websocket message formats
+            if action:
+                if "payload" in message_data:
+                    # Process using legacy format
+                    response = await manager.handle_message(WebSocketCommand(**message_data), websocket)
+                else:
+                    # Process using new format
+                    response = await manager.handle_message(WebSocketCommand(type=action, **message_data), websocket)
+                
+                # Send response if applicable
+                if response:
+                    await websocket.send_text(json.dumps(response))
                 
     except WebSocketDisconnect:
         manager.disconnect(websocket)
