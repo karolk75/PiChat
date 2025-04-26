@@ -1,25 +1,18 @@
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Depends, HTTPException
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 import json
-from typing import Dict, List, Any
 import logging
+
+from app.models.websocket import WebSocketCommand
 from .config import settings
-from .models import SessionLocal, engine, Base
-from .schemas import WebSocketCommand
-from .websocket import ConnectionManager
-from .routers import conversations, messages, users, settings_router
-from .routers.chats import router as chats_router 
-from .auth import get_api_key
-from .websocket_handlers import register_handlers
+from .websocket.websocket import ConnectionManager
+from .websocket.websocket_handlers import register_handlers
 
 # Initialize logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Create database tables (legacy SQLAlchemy tables)
-Base.metadata.create_all(bind=engine)
-
-app = FastAPI(title="PiChat API", description="WebSocket and REST API for PiChat")
+app = FastAPI(title="PiChat API", description="WebSocket API for PiChat")
 
 # Add CORS middleware
 app.add_middleware(
@@ -35,13 +28,6 @@ manager = ConnectionManager()
 
 # Register WebSocket handlers
 register_handlers(manager)
-
-# Include routers
-app.include_router(conversations.router, prefix="/api", tags=["conversations"])
-app.include_router(messages.router, prefix="/api", tags=["messages"])
-app.include_router(users.router, prefix="/api", tags=["users"])
-app.include_router(settings_router.router, prefix="/api", tags=["settings"])
-app.include_router(chats_router, prefix="/api", tags=["chats"])
 
 @app.get("/")
 async def root():
@@ -65,13 +51,13 @@ async def websocket_endpoint(websocket: WebSocket, token: str = None):
             # Process message based on action/type
             action = message_data.get("type", message_data.get("action", ""))
             
-            # Handle both legacy and new websocket message formats
+            # Handle WebSocket message format
             if action:
                 if "payload" in message_data:
-                    # Process using legacy format
+                    # Process using payload format
                     response = await manager.handle_message(WebSocketCommand(**message_data), websocket)
                 else:
-                    # Process using new format
+                    # Process using flat format
                     response = await manager.handle_message(WebSocketCommand(type=action, **message_data), websocket)
                 
                 # Send response if applicable

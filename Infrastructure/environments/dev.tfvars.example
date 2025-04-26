@@ -1,0 +1,10 @@
+project_name = "pichat"
+environment  = "dev"
+location     = "uksouth"
+
+cosmos_database_name = "pichat"
+
+redirect_uris = [
+  "http://localhost:3000/",           # Frontend
+  "http://localhost:8080/docs/oauth2-redirect/"  # Backend Swagger docs
+] 

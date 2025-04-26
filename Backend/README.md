@@ -1,11 +1,10 @@
 # PiChat Backend
 
-A modular FastAPI-based backend for PiChat with WebSocket support and Azure Cosmos DB integration.
+A streamlined WebSocket-based backend for PiChat with Azure Cosmos DB integration.
 
 ## Features
 
-- RESTful API endpoints for chat management
-- WebSocket support for real-time messaging
+- WebSocket API for real-time chat messaging
 - Azure Cosmos DB integration for cloud-native NoSQL storage
 - Structured project layout following FastAPI best practices
 - Authentication using API tokens
@@ -47,14 +46,6 @@ Or with uvicorn directly:
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8080
 ```
 
-## API Documentation
-
-Once the application is running, you can access the Swagger UI documentation at:
-
-```
-http://localhost:8080/docs
-```
-
 ## WebSocket API
 
 The WebSocket API is available at `/ws`. You can connect to it using any WebSocket client.
@@ -69,17 +60,59 @@ The WebSocket API supports the following commands:
 - `DELETE_CHAT`: Delete a chat
 - `SEND_MESSAGE`: Send a message in a chat
 
+### Example Usage
+
+```javascript
+// Connect to WebSocket
+const socket = new WebSocket('ws://localhost:8080/ws');
+
+// Get all chats
+socket.send(JSON.stringify({ type: 'GET_CHATS' }));
+
+// Create a new chat
+socket.send(JSON.stringify({ 
+  type: 'CREATE_CHAT', 
+  name: 'My New Chat' 
+}));
+
+// Get chat history
+socket.send(JSON.stringify({ 
+  type: 'GET_CHAT_HISTORY', 
+  chatId: 'chat-id-here' 
+}));
+
+// Send a message
+socket.send(JSON.stringify({ 
+  type: 'SEND_MESSAGE', 
+  chatId: 'chat-id-here', 
+  message: {
+    content: 'Hello, world!',
+    id: 'unique-message-id'
+  }
+}));
+
+// Delete a chat
+socket.send(JSON.stringify({ 
+  type: 'DELETE_CHAT', 
+  chatId: 'chat-id-here' 
+}));
+
+// Handle responses
+socket.onmessage = (event) => {
+  const response = JSON.parse(event.data);
+  console.log(response);
+};
+```
+
 ## Project Structure
 
 ```
 PiChat/
 ├── app/
-│   ├── routers/          # API route definitions
 │   ├── schemas/          # Pydantic models
 │   ├── services/         # Service layer
 │   ├── config.py         # Application configuration
 │   ├── main.py           # FastAPI application
-│   ├── models.py         # Database models (legacy)
 │   ├── websocket.py      # WebSocket connection manager
 │   └── websocket_handlers.py  # WebSocket message handlers
 ├── .env                  # Environment variables (not in repo)
