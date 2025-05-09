@@ -2,17 +2,37 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 import json
 import logging
+from contextlib import asynccontextmanager
 
 from app.models.websocket import WebSocketCommand
 from .config import settings
 from .websocket.websocket import ConnectionManager
 from .websocket.websocket_handlers import register_handlers
+from .services.azure_iot_hub import iot_hub_service, set_connection_manager
 
 # Initialize logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-app = FastAPI(title="PiChat API", description="WebSocket API for PiChat")
+# Initialize WebSocket connection manager
+manager = ConnectionManager()
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Set the connection manager for the IoT Hub service
+    set_connection_manager(manager)
+    
+    # Start the IoT Hub service
+    await iot_hub_service.start()
+    logger.info("Application started")
+    
+    yield
+    
+    # Stop the IoT Hub service
+    await iot_hub_service.stop()
+    logger.info("Application shutdown")
+
+app = FastAPI(title="PiChat API", description="WebSocket API for PiChat", lifespan=lifespan)
 
 # Add CORS middleware
 app.add_middleware(
@@ -22,9 +42,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# Initialize WebSocket connection manager
-manager = ConnectionManager()
 
 # Register WebSocket handlers
 register_handlers(manager)
@@ -53,16 +70,14 @@ async def websocket_endpoint(websocket: WebSocket, token: str = None):
             
             # Handle WebSocket message format
             if action:
-                if "payload" in message_data:
-                    # Process using payload format
-                    response = await manager.handle_message(WebSocketCommand(**message_data), websocket)
-                else:
-                    # Process using flat format
-                    response = await manager.handle_message(WebSocketCommand(type=action, **message_data), websocket)
+                response = await manager.handle_message(WebSocketCommand(**message_data), websocket)
                 
                 # Send response if applicable
                 if response:
                     await websocket.send_text(json.dumps(response))
+            else:
+                logger.error("No action found in message")
+                await websocket.send_text(json.dumps({"type": "error", "payload": {"message": "No action found in message"}}))
                 
     except WebSocketDisconnect:
         manager.disconnect(websocket)
@@ -74,4 +89,11 @@ async def websocket_endpoint(websocket: WebSocket, token: str = None):
 # Health check endpoint
 @app.get("/health")
 async def health_check():
-    return {"status": "healthy"} 
+    # Include IoT Hub status in health check
+    iot_hub_status = "running" if iot_hub_service.running else "stopped"
+    return {
+        "status": "healthy",
+        "services": {
+            "iot_hub": iot_hub_status
+        }
+    } 

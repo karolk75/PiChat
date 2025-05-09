@@ -1,4 +1,4 @@
-resource "azurerm_cosmosdb_account" "db" {
+resource "azurerm_cosmosdb_account" "cosmos_db" {
   name                = var.cosmos_db_name
   location            = var.location
   resource_group_name = var.resource_group_name
@@ -24,19 +24,19 @@ resource "azurerm_cosmosdb_account" "db" {
 }
 
 # Create Cosmos DB Database
-resource "azurerm_cosmosdb_sql_database" "database" {
+resource "azurerm_cosmosdb_sql_database" "cosmos_database" {
   name                = var.database_name
   resource_group_name = var.resource_group_name
-  account_name        = azurerm_cosmosdb_account.db.name
+  account_name        = azurerm_cosmosdb_account.cosmos_db.name
 }
 
 # Create Cosmos DB Containers
-resource "azurerm_cosmosdb_sql_container" "containers" {
+resource "azurerm_cosmosdb_sql_container" "cosmos_containers" {
   count               = length(var.containers)
   name                = var.containers[count.index].name
   resource_group_name = var.resource_group_name
-  account_name        = azurerm_cosmosdb_account.db.name
-  database_name       = azurerm_cosmosdb_sql_database.database.name
+  account_name        = azurerm_cosmosdb_account.cosmos_db.name
+  database_name       = azurerm_cosmosdb_sql_database.cosmos_database.name
   partition_key_paths = var.containers[count.index].partition_key_paths
   
   # Default indexing policy

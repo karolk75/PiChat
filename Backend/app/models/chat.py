@@ -5,6 +5,7 @@ from pydantic import BaseModel
 from app.models.message import ChatMessage
 
 
+
 class Chat(BaseModel):
     id: str
     name: str

@@ -81,14 +81,6 @@ class ConnectionManager:
         payload = {}
         if hasattr(message, "payload") and message.payload:
             payload = message.payload
-        else:
-            # For new format, build payload from other properties
-            if message.chatId:
-                payload["chatId"] = message.chatId
-            if message.message:
-                payload["message"] = message.message
-            if message.name:
-                payload["name"] = message.name
 
         # Check if we have a handler for this action
         if action in self.message_handlers:

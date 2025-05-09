@@ -1,0 +1,21 @@
+{
+    "AzureCognitiveServices": {
+        "Key": "",
+        "Region": "uksouth",
+        "SpeechRecognitionLanguage": "en-US",
+        "SpeechSynthesisVoiceName": "en-US-JennyNeural",
+        "WakePhraseModel": "keyword_model.table",
+        "WakeWord": "Hey Iris",
+        "StopWord": "Stop conversation"
+    },
+    "AzureIoTHub": {
+        "ConnectionString": ""
+    },
+    "AzureOpenAI": {
+        "Key": "",
+        "Endpoint": "https://eastus2.api.cognitive.microsoft.com/",
+        "api_version": "2023-05-15",
+        "Model": "gpt-35-turbo",
+        "MaxTokens": 4000
+    }
+} 

@@ -1,3 +1,3 @@
-export { SocketService } from './socket';
 export { ChatService } from './chatService';
-export { MessageService } from './messageService'; 
+export { MessageService } from './messageService';
+export { SocketService } from './socket'; 

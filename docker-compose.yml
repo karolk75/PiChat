@@ -1,75 +1,48 @@
 version: '3.8'
 
 services:
-  # FastAPI backend service
-  pichat-backend:
+  frontend:
+    build:
+      context: ./Frontend
+      dockerfile: DockerFile
+    ports:
+      - "${FRONTEND_PORT:-8501}:8501"
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - pichat-network
+
+  backend:
     build:
       context: ./Backend
       dockerfile: Dockerfile
-    container_name: pichat-backend
-    restart: unless-stopped
     ports:
       - "${SERVER_PORT:-8080}:8080"
+    restart: unless-stopped
+    networks:
+      - pichat-network
     environment:
-      # Server configuration
-      SERVER_PORT: ${SERVER_PORT:-8080}
-      API_TOKEN: ${API_TOKEN:-your_secure_token_here}
-      ENVIRONMENT: ${ENVIRONMENT:-development}
-      
+      - COSMOS_ENDPOINT=${COSMOS_ENDPOINT}
+      - COSMOS_KEY=${COSMOS_KEY}
+      - COSMOS_DATABASE=pichat
+      - COSMOS_CONTAINER_CHATS=chats
+      - COSMOS_CONTAINER_MESSAGES=messages
+      - COSMOS_CONTAINER_USERS=users
+      - COSMOS_CONTAINER_SETTINGS=settings
+      - COSMOS_CONTAINER_PROCESSED_MESSAGES=processed_messages
       # Azure OpenAI configuration
-      AZURE_OPENAI_ENDPOINT: ${AZURE_OPENAI_ENDPOINT}
-      AZURE_OPENAI_KEY: ${AZURE_OPENAI_KEY}
-      AZURE_OPENAI_DEPLOYMENT_GPT4: ${AZURE_OPENAI_DEPLOYMENT_GPT4}
-      AZURE_OPENAI_DEPLOYMENT_GPT35: ${AZURE_OPENAI_DEPLOYMENT_GPT35}
-      
-      # Azure Speech configuration
-      AZURE_SPEECH_KEY: ${AZURE_SPEECH_KEY}
-      AZURE_SPEECH_REGION: ${AZURE_SPEECH_REGION}
-      
-      # Database configuration (pointing to the database service)
-      DB_HOST: db
-      DB_NAME: ${DB_NAME:-pichat}
-      DB_USER: ${DB_USER:-pichat_admin}
-      DB_PASSWORD: ${DB_PASSWORD:-secure_password}
-      DB_PORT: ${DB_PORT:-5432}
-    depends_on:
-      - db
-    networks:
-      - pichat-network
+      - AZURE_OPENAI_ENDPOINT=${AZURE_OPENAI_ENDPOINT}
+      - AZURE_OPENAI_KEY=${AZURE_OPENAI_KEY}
+      - AZURE_OPENAI_DEPLOYMENT_NAME=${AZURE_OPENAI_DEPLOYMENT_NAME}
+      - AZURE_OPENAI_API_VERSION=${AZURE_OPENAI_API_VERSION}
+      # Azure IoT Hub configuration
+      - IOT_HUB_NAME=${IOT_HUB_NAME}
+      - IOT_HUB_HOST_NAME=${IOT_HUB_HOST_NAME}
+      - IOT_HUB_CONSUMER_GROUP=${IOT_HUB_CONSUMER_GROUP:-backend}
+      - IOT_HUB_ENABLE=${IOT_HUB_ENABLE:-false}
     volumes:
-      - ./Backend:/app
       - backend-data:/app/data
-
-  # Database service (PostgreSQL for local development)
-  db:
-    image: postgres:15-alpine
-    container_name: pichat-db
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: ${DB_NAME:-pichat}
-      POSTGRES_USER: ${DB_USER:-pichat_admin}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-secure_password}
-    ports:
-      - "${DB_PORT:-5432}:5432"
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-    networks:
-      - pichat-network
-
-  # pgAdmin for database management (optional)
-  pgadmin:
-    image: dpage/pgadmin4
-    container_name: pichat-pgadmin
-    restart: unless-stopped
-    environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@pichat.com}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
-    ports:
-      - "${PGADMIN_PORT:-5050}:80"
-    depends_on:
-      - db
-    networks:
-      - pichat-network
 
 networks:
   pichat-network:
@@ -77,4 +50,3 @@ networks:
 
 volumes:
   backend-data:
-  postgres-data: 

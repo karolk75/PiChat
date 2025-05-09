@@ -1,6 +1,7 @@
 project_name = "pichat"
 environment  = "dev"
 location     = "uksouth"
+additional_user_email = "user@email.com"
 
 cosmos_database_name = "pichat"
 
@@ -8,3 +9,13 @@ redirect_uris = [
   "http://localhost:3000/",           # Frontend
   "http://localhost:8080/docs/oauth2-redirect/"  # Backend Swagger docs
 ] 
+
+# Speech Services 
+speech_services_sku = "S0"
+
+# OpenAI Service
+openai_sku = "S0"
+openai_model_deployment_name = "pichat-gpt-4o-mini"
+openai_model_name = "gpt-4o-mini"
+openai_model_version = "2024-07-18"
+openai_model_capacity = 1 

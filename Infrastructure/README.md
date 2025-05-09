@@ -10,8 +10,11 @@ This directory contains Terraform code to set up the Azure infrastructure requir
   - Messages
   - Users
   - Settings
-- **Azure AD Application**: For single-tenant authentication
+  - Processed messages
 - **Azure Key Vault**: For securely storing secrets and connection strings
+- **Azure Cognitive Services Speech**: For voice recognition and speech synthesis
+- **Azure OpenAI Service**: For ChatGPT API integration
+- **Azure IoT Hub**: For Raspberry Pi device communication
 
 ## Prerequisites
 
@@ -33,14 +36,16 @@ This directory contains Terraform code to set up the Azure infrastructure requir
     terraform init
     ```
 
-3. **Create terraform.tfvars file (optional)**
+3. **Create terraform.tfvars file (required)**
 
-    Create a `terraform.tfvars` file to customize variables:
+    Create a `dev.tfvars` file to customize variables:
 
     ```
     project_name = "pichat"
     environment = "dev"
-    location = "eastus"
+    location = "uksouth"
+    subscription_id = "your-subscription-id"
+    additional_user_email = "your-email@example.com" # Optional
     ```
 
 4. **Plan the deployment**
@@ -59,11 +64,6 @@ This directory contains Terraform code to set up the Azure infrastructure requir
 
     After deployment, update your Backend `.env` file with the generated outputs:
 
-    ```
-    COSMOS_ENDPOINT=<cosmos_db_endpoint>
-    COSMOS_KEY=<cosmos_primary_master_key>
-    ```
-
     You can get these values from the Azure Key Vault or from the Terraform outputs.
 
 ## Module Structure
@@ -75,15 +75,19 @@ Infrastructure/
 ├── environments/       # Environment-specific configurations
 └── modules/
     ├── cosmos_db/      # Azure Cosmos DB configuration
-    ├── auth/           # Azure AD authentication
-    └── key_vault/      # Azure Key Vault for secrets
+    ├── key_vault/      # Azure Key Vault for secrets
+    ├── speech_services/# Azure Cognitive Services Speech
+    ├── openai/         # Azure OpenAI Service
+    ├── iot_hub/        # Azure IoT Hub for device communication
+    ├── auth/           # Azure AD authentication (currently disabled)
+    └── storage/        # Azure Storage Account (currently disabled)
 ```
 
 ## Customization
 
 You can customize the deployment by modifying the variables in:
 
-- `terraform.tfvars` - For environment-specific values
+- `{environment name}.tfvars` - For environment-specific values
 - `variables.tf` - For default values and variable definitions
 
 ## Cleanup

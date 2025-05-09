@@ -5,6 +5,11 @@ from fastapi import WebSocket
 
 from app.services.cosmos_db import CosmosDBService, get_cosmos_db
 
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 
 async def handle_get_chats(payload: Dict[str, Any], websocket: WebSocket, db: CosmosDBService = None) -> Dict[str, Any]:
     """WebSocket handler to get all chats"""

@@ -5,9 +5,7 @@ from pydantic import BaseModel, Field
 
 class WebSocketCommand(BaseModel):
     type: str
-    chatId: Optional[str] = None
-    message: Optional[Dict[str, Any]] = None
-    name: Optional[str] = None
+    payload: Optional[Dict[str, Any]] = None
 
 
 class WebSocketResponse(BaseModel):

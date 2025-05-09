@@ -49,4 +49,73 @@ variable "app_client_secret" {
   description = "Azure AD application client secret"
   type        = string
   sensitive   = true
-} 
+}
+
+variable "openai_key" {
+  description = "OpenAI key"
+  type        = string
+  sensitive   = true
+}
+
+variable "openai_endpoint" {
+  description = "OpenAI endpoint"
+  type        = string
+  sensitive   = true
+}
+
+variable "openai_model_deployment_id" {
+  description = "OpenAI model deployment id"
+  type        = string
+}
+
+variable "speech_service_key" {
+  description = "Speech service key"
+  type        = string
+  sensitive   = true
+}
+
+variable "speech_service_endpoint" {
+  description = "Speech service endpoint"
+  type        = string
+  sensitive   = true
+}
+
+variable "additional_user_email" {
+  description = "Email of additional user to grant access to Key Vault"
+  type        = string
+  default     = ""
+}
+
+variable "iot_hub_connection_string" {
+  description = "IoT Hub connection string"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "iot_hub_event_hub_endpoint" {
+  description = "IoT Hub Event Hub-compatible endpoint"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "iot_hub_event_hub_path" {
+  description = "IoT Hub Event Hub-compatible path"
+  type        = string
+  default     = ""
+}
+
+variable "checkpoint_storage_connection_string" {
+  description = "Storage account connection string for IoT Hub checkpoints"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+
+
+
+
+
+

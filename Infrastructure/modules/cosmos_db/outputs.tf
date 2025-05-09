@@ -1,11 +1,11 @@
 output "cosmos_endpoint" {
   description = "The endpoint of the Cosmos DB account"
-  value       = azurerm_cosmosdb_account.db.endpoint
+  value       = azurerm_cosmosdb_account.cosmos_db.endpoint
 }
 
 output "primary_master_key" {
   description = "The primary master key for the Cosmos DB account"
-  value       = azurerm_cosmosdb_account.db.primary_key
+  value       = azurerm_cosmosdb_account.cosmos_db.primary_key
   sensitive   = true
 }
 
@@ -17,5 +17,5 @@ output "primary_master_key" {
 
 output "cosmos_db_id" {
   description = "The ID of the Cosmos DB account"
-  value       = azurerm_cosmosdb_account.db.id
+  value       = azurerm_cosmosdb_account.cosmos_db.id
 } 
