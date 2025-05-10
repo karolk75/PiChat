@@ -39,8 +39,9 @@ services:
       # Azure IoT Hub configuration
       - IOT_HUB_NAME=${IOT_HUB_NAME}
       - IOT_HUB_HOST_NAME=${IOT_HUB_HOST_NAME}
-      - IOT_HUB_CONSUMER_GROUP=${IOT_HUB_CONSUMER_GROUP:-backend}
-      - IOT_HUB_ENABLE=${IOT_HUB_ENABLE:-false}
+      - EVENT_HUB_COMPATIBLE_CONN_STR=${EVENT_HUB_COMPATIBLE_CONN_STR}
+      - IOT_HUB_CONSUMER_GROUP=${IOT_HUB_CONSUMER_GROUP}
+      - IOT_HUB_ENABLE=${IOT_HUB_ENABLE}
     volumes:
       - backend-data:/app/data
 
