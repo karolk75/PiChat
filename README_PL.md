@@ -19,7 +19,7 @@
 
 PiChat to wszechstronny system chatbota AI, który łączy moc Raspberry Pi z usługami chmurowymi Azure, tworząc asystenta z podwójnym interfejsem. System oferuje:
 
-1. **Interfejs głosowy**: Aktywacja głosowa za pomocą frazy "Hey Iris" (konfigurowalna) na Raspberry Pi, umożliwiająca naturalną rozmowę z asystentem AI.
+1. **Interfejs głosowy**: Aktywacja głosowa za pomocą frazy "Hey GPT" (konfigurowalna) na Raspberry Pi, umożliwiająca naturalną rozmowę z asystentem AI.
 2. **Interfejs webowy**: Dostęp do tych samych możliwości AI poprzez responsywną aplikację webową, zapewniającą rozmowy tekstowe i zarządzanie historią.
 
 System obsługuje modele językowe Azure OpenAI, umożliwia personalizację osobowości asystenta oraz zachowuje historię rozmów w obu interfejsach. Wszystkie interakcje użytkownika są przechowywane w Azure Cosmos DB, co umożliwia przeglądanie i kontynuowanie poprzednich rozmów.
@@ -98,7 +98,7 @@ Interfejs webowy PiChat to nowoczesna aplikacja React oferująca wygodny dostęp
 Interfejs głosowy PiChat działa na Raspberry Pi, oferując naturalne interakcje głosowe z asystentem AI.
 
 ### Funkcje interfejsu głosowego
-- Aktywacja głosowa przez frazę "Hey Iris" (konfigurowalna)
+- Aktywacja głosowa przez frazę "Hey GPT" (konfigurowalna)
 - Rozpoznawanie mowy z wykorzystaniem Azure Cognitive Services
 - Synteza mowy wysokiej jakości z użyciem głosów neuralnych Azure
 - Zachowanie kontekstu konwersacji
